@@ -1,0 +1,102 @@
+---
+title: "Practical machine learning project"
+author: "GBEHI BADIA 62 104"
+date: "5/28/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Assignment
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here
+
+## Data
+
+The data for this project come from this source: http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har. If you use the document you create for this class for any purpose please cite them as they have been very generous in allowing their data to be used for this kind of assignment.
+
+The training data for this project are available here:
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
+
+The test data are available here:
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+
+# Data Collection
+
+```{r}
+trainingData = read.csv("C:/Users/HP/Desktop/Econometrics/pml-training.csv",head = TRUE)
+testing = read.csv("C:/Users/HP/Desktop/Econometrics/pml-testing.csv",head = TRUE)
+
+dim(trainingData)
+```
+
+The training data has 19622 observations and 160 variables, and 5 outcomes in the classe variable
+
+```{r}
+table(trainingData$classe)
+```
+## Loading relevant libraries
+```{r}
+library(markdown)
+library(caret)
+library(ggplot2)
+library(lattice)
+library(dplyr)
+library(tidyr)
+library(randomForest)
+```
+
+## Data Cleansing
+#Partitioning
+
+We will separate the training set into a training one and a validation one
+```{r}
+set.seed(33833)
+inTrain <- createDataPartition(y=trainingData$classe, p = 0.7, list = FALSE)
+training <- trainingData[inTrain, ]
+validation <- trainingData[-inTrain, ]
+```
+
+#Variables deletion
+
+We will delete all the varaiable (1) that describe (2) with missing data (NA)
+
+```{r}
+#Exclude descriptive columns and those with NA or Null
+training = training[,-c(54:159)]
+```
+
+## Model training
+We will use random forest as our model as implemented in the randomForest 
+
+```{r}
+rfFit <- randomForest(classe ~ ., data = training)
+```
+
+##Model Validation
+We will evaluate the effeciency of our model both in and out sample
+
+#In Sample accuaracy
+```{r}
+predTraining <- predict(rfFit, training)
+print(confusionMatrix(predTraining, training$classe))
+```
+
+#Out of sample accuracy
+
+```{r}
+predValidation <- predict(rfFit, validation)
+print(confusionMatrix(predValidation, validation$classe))
+```
+
+## Prediction on the Test Data
+
+```{r}
+predTest = predict(rfFit,testing)
+predTest
+```
+
+```{r}
+    
+```
